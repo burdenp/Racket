@@ -1,0 +1,112 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname PS2) (read-case-sensitive #t) (teachpacks ((lib "guess.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "guess.rkt" "teachpack" "htdp")))))
+#lang pl 02
+#| BNF for the LE
+  <LE> :: = <list>
+          | { null }
+          | { (cons <symbol> <LE> }
+          | { (cons <num> <LE>}
+|#
+
+;; ---< The AE interpreter >---
+;;changed to infix notation
+#| BNF for the AE language:
+   <AE> ::= <num>
+          | { <AE> + <AE> }
+          | { <AE> - <AE> }
+          | { <AE> * <AE> }
+          | { <AE> / <AE> }
+|#
+
+;; AE abstract syntax trees
+(define-type AE
+  [Num Number]
+  [Add AE AE]
+  [Sub AE AE]
+  [Mul AE AE]
+  [Div AE AE])
+
+(: parse-sexpr : Sexpr -> AE)
+;; to convert s-expressions into AEs
+(define (parse-sexpr sexpr)
+  (match sexpr
+    [(number: n) (Num n)]
+    [(list lhs '+ rhs) (Add (parse-sexpr lhs) (parse-sexpr rhs))]
+    [(list lhs '- rhs) (Sub (parse-sexpr lhs) (parse-sexpr rhs))]
+    [(list lhs '* rhs) (Mul (parse-sexpr lhs) (parse-sexpr rhs))]
+    [(list lhs '/ rhs) (Div (parse-sexpr lhs) (parse-sexpr rhs))]
+    [else (error 'parse-sexpr "bad syntax in ~s" sexpr)]))
+
+(: parse : String -> AE)
+;; parses a string containing an AE expression to an AE AST
+(define (parse str)
+  (parse-sexpr (string->sexpr str)))
+
+(: eval : AE -> Number)
+;; consumes an AE and computes the corresponding number
+(define (eval expr)
+  (cases expr
+    [(Num n)   n]
+    [(Add l r) (+ (eval l) (eval r))]
+    [(Sub l r) (- (eval l) (eval r))]
+    [(Mul l r) (* (eval l) (eval r))]
+    [(Div l r) (cond [(= 0 (eval r)) 999]
+                 [else (/ (eval l) (eval r))])]))
+
+(: run : String -> Number)
+;; evaluate an AE program contained in a string
+(define (run str)
+  (eval (parse str)))
+
+;; tests
+(test (run "3") => 3)
+(test (run "{+ 3 4}") => 7)
+(test (run "{+ {- 3 4} 7}") => 6)
+(test (run "{* 3 4}") => 12)
+(test (run "{/ 4 2}") => 2)
+(test (run "{/ 2 0}") => 999)
+#|
+<MAE> ::= <num>
+        | { + <MAE> <MAE> }
+        | { - <MAE> <MAE> }
+        | { * <MAE> <MAE> }
+        | { / <MAE> <MAE> }
+        | { set <MAE> }
+        | get
+|#
+#| {* {+ {set 1} {set 2}} get}
+   The problem is that two separate values were set and only one of them
+   was gotten
+|#
+#|
+  <SAE> ::= <AE>
+         | <MAE>
+|#
+;;2
+;;Num -> num
+;;squares the number
+(define (square x)
+  (* x x))
+;;LIST of Num -> num
+;;takes in a list of numbers and produces a number which
+;;is the sum of the squares of all the numbers of the lists
+(define (sum-of-squares list)
+  (foldl + 0 (map square list))
+(test (sum-of-squares (list 2  3)) => 13)
+(test (sum-of-squares (list 0 1)) => 1)
+
+;;3
+;;binary-tree is a
+;; Leaf
+;; Node
+;;A leaf is 
+;; a num
+;;a Node is
+;; binary-tree binary-tree
+(define-type (Bintree 
+ 
+  
+  
+  
+  

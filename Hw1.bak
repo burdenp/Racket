@@ -1,0 +1,14 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Hw1) (read-case-sensitive #t) (teachpacks ((lib "guess.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "guess.rkt" "teachpack" "htdp")))))
+;;bin4-to-num: (binary num)(binary num)(binary num)(binary num) -> num
+;;takes 4 binary numbers from least significant digit to most and
+;;converts it to a decimal number
+(define (bin4-to-num a b c d)
+  (+ a (* b 2) (* c 4) (* d 8)))
+
+(equal? 13 (bin4-to-num 1 0 1 1))
+(equal? 0 (bin4-to-num 0 0 0 0))
+(equal? 15 (bin4-to-num 1 1 1 1))
+
+(define (
